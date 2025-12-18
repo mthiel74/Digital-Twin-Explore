@@ -62,16 +62,16 @@ The `pipeline_twin` package adds a modular, laptop-scale transient 1D pipeline
 digital twin with pump/valve boundaries, leak injection, synthetic sensors, and
 EnKF-based state/parameter estimation. Specs live in `SPEC.md`.
 
-Run a simulation and save plots (JSON-in-YAML config files are supported):
+Run a simulation and save plots:
 
 ```bash
-PYTHONPATH=src python -m pipeline_twin.run --config configs/default.yaml --outdir outputs --image-format svg
+python -m pipeline_twin.run --config configs/default.yaml --outdir outputs
 ```
 
 Disable plots:
 
 ```bash
-PYTHONPATH=src python -m pipeline_twin.run --config configs/default.yaml --no-plots
+python -m pipeline_twin.run --config configs/default.yaml --no-plots
 ```
 
 Configuration examples:
@@ -79,30 +79,6 @@ Configuration examples:
 - `configs/leak_sweep.yaml`: sample leak sweep setup.
 
 All plots are written to the `outputs/` directory.
-
-### Example visuals (leak sweep scenario)
-
-Generated with:
-
-```bash
-PYTHONPATH=src python -m pipeline_twin.run --config configs/leak_sweep.yaml --outdir outputs --image-format svg
-```
-
-The figures below are generated artifacts checked into the repo under
-`outputs/` (saved as SVG to avoid binary-assets issues) so they render
-directly in this README.
-
-| Pressure heatmap | Flow heatmap |
-| --- | --- |
-| ![Pressure heatmap](outputs/pressure_heatmap.svg) | ![Flow heatmap](outputs/flow_heatmap.svg) |
-
-| Pressure sections (inlet/mid/outlet) | Boundary commands |
-| --- | --- |
-| ![Pressure sections](outputs/pressure_sections.svg) | ![Boundary commands](outputs/boundary_commands.svg) |
-
-| EnKF innovation residuals | Leak localization scores |
-| --- | --- |
-| ![Innovation residuals](outputs/residuals.svg) | ![Leak localization scores](outputs/leak_scores.svg) |
 
 ## Outputs
 
