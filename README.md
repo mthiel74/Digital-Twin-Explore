@@ -56,6 +56,30 @@ Helper to generate example outputs:
 python make_example_outputs.py
 ```
 
+## Pipeline twin module (transient 1D)
+
+The `pipeline_twin` package adds a modular, laptop-scale transient 1D pipeline
+digital twin with pump/valve boundaries, leak injection, synthetic sensors, and
+EnKF-based state/parameter estimation. Specs live in `SPEC.md`.
+
+Run a simulation and save plots:
+
+```bash
+python -m pipeline_twin.run --config configs/default.yaml --outdir outputs
+```
+
+Disable plots:
+
+```bash
+python -m pipeline_twin.run --config configs/default.yaml --no-plots
+```
+
+Configuration examples:
+- `configs/default.yaml`: nominal run without leaks.
+- `configs/leak_sweep.yaml`: sample leak sweep setup.
+
+All plots are written to the `outputs/` directory.
+
 ## Outputs
 
 Running with `--save-plots` creates:

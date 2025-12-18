@@ -1,0 +1,37 @@
+{
+  "domain": {
+    "length": 800.0,
+    "n_cells": 40,
+    "dt": 0.2,
+    "total_time": 200.0,
+    "wave_speed": 320.0,
+    "friction": 0.03
+  },
+  "boundaries": {
+    "pump_head": 2.0,
+    "valve_setpoint": 1.2,
+    "pump_ramp": 5.0,
+    "valve_ramp": 5.0,
+    "actuator_tau": 3.0
+  },
+  "leak": {
+    "coefficient": 0.0,
+    "index": null,
+    "start_time": null
+  },
+  "sensors": {
+    "pressure_noise": 0.01,
+    "flow_noise": 0.02,
+    "pressure_bias_drift": 0.0,
+    "flow_bias_drift": 0.0,
+    "latency_steps": 0,
+    "sample_every": 1,
+    "seed": 4
+  },
+  "enkf": {
+    "ensemble_size": 10,
+    "inflation": 1.01,
+    "obs_noise_scale": 1.0,
+    "parameter_drift": 0.0
+  }
+}
