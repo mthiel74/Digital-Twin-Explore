@@ -71,7 +71,7 @@ python -m pipeline_twin.run --config configs/default.yaml --outdir outputs
 Disable plots:
 
 ```bash
-python -m pipeline_twin.run --config configs/default.yaml --no-plots
+PYTHONPATH=src python -m pipeline_twin.run --config configs/default.yaml --no-plots
 ```
 
 Configuration examples:
@@ -79,6 +79,50 @@ Configuration examples:
 - `configs/leak_sweep.yaml`: sample leak sweep setup.
 
 All plots are written to the `outputs/` directory.
+
+### Example visuals (leak sweep scenario)
+
+Generated with:
+
+```bash
+PYTHONPATH=src python -m pipeline_twin.run --config configs/leak_sweep.yaml --outdir outputs --image-format svg
+```
+
+The figures below are generated artifacts checked into `outputs/` (saved as SVG
+to avoid binary-assets issues) so they render directly in this README. Each plot
+includes a short interpretation to make the signals self-explanatory.
+
+**Pressure heatmap.** Transient compression waves propagate from the pump (left)
+toward the valve (right). The leak (in the second half of the pipe) pulls
+pressure down locally and nudges the downstream flow profile higher.
+
+![Pressure heatmap](outputs/pressure_heatmap.svg)
+
+**Flow heatmap.** Flow accelerates downstream of the leak as the fluid bypasses
+the restriction; upstream segments show damped oscillations from the pump ramp.
+
+![Flow heatmap](outputs/flow_heatmap.svg)
+
+**Pressure sections (inlet/mid/outlet).** Inlet pressure rises with pump ramp,
+mid-pipe pressure shows the leak-induced dip, and outlet pressure tracks valve
+restriction.
+
+![Pressure sections](outputs/pressure_sections.svg)
+
+**Boundary commands.** Smooth first-order pump/valve ramps with no chatter,
+providing deterministic actuation inputs for the simulation.
+
+![Boundary commands](outputs/boundary_commands.svg)
+
+**EnKF innovation residuals.** Innovation magnitude spikes when the leak
+activates, then settles as the EnKF adapts.
+
+![Innovation residuals](outputs/residuals.svg)
+
+**Leak localization scores.** The bank-of-filters scoring favors the planted
+leak index, demonstrating successful localization.
+
+![Leak localization scores](outputs/leak_scores.svg)
 
 ## Outputs
 

@@ -1,14 +1,14 @@
 """Configuration utilities for the pipeline digital twin.
 
-The configuration uses lightweight dataclasses and YAML parsing to keep
-simulation and estimation settings transparent and reproducible.
+The configuration uses lightweight dataclasses and JSON (YAML-compatible) files
+to keep simulation and estimation settings transparent and reproducible.
 """
 from __future__ import annotations
 
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 from copy import deepcopy
 
 
@@ -64,6 +64,7 @@ class TwinConfig:
     leak: LeakConfig
     sensors: SensorConfig
     enkf: EnKFConfig
+    hypotheses: Optional[List[int]] = None
 
 
 def _as_dataclass(cls, data: dict):
@@ -76,7 +77,17 @@ def load_config(path: str | Path) -> TwinConfig:
     data = json.loads(path.read_text())
 
     if "include" in data:
-        base_path = path.parent / data["include"]
+        include_raw = Path(data["include"])
+        candidate_paths = []
+        if include_raw.is_absolute():
+            candidate_paths.append(include_raw)
+        candidate_paths.append(path.parent / include_raw)
+        candidate_paths.append(Path.cwd() / include_raw)
+
+        base_path = next((p for p in candidate_paths if p.exists()), None)
+        if base_path is None:
+            raise FileNotFoundError(f"Include file not found: {include_raw}")
+
         base_cfg = json.loads(base_path.read_text())
         merged = deepcopy(base_cfg)
         merged.update({k: v for k, v in data.items() if k != "include"})
@@ -86,7 +97,7 @@ def load_config(path: str | Path) -> TwinConfig:
     leak = _as_dataclass(LeakConfig, data.get("leak", {}))
     sensors = _as_dataclass(SensorConfig, data.get("sensors", {}))
     enkf = _as_dataclass(EnKFConfig, data.get("enkf", {}))
-    return TwinConfig(domain=domain, boundaries=boundaries, leak=leak, sensors=sensors, enkf=enkf)
+    return TwinConfig(domain=domain, boundaries=boundaries, leak=leak, sensors=sensors, enkf=enkf, hypotheses=data.get("hypotheses"))
 
 
 def save_config(cfg: TwinConfig, path: str | Path) -> None:
@@ -98,4 +109,6 @@ def save_config(cfg: TwinConfig, path: str | Path) -> None:
         "sensors": cfg.sensors.__dict__,
         "enkf": cfg.enkf.__dict__,
     }
+    if cfg.hypotheses is not None:
+        payload["hypotheses"] = cfg.hypotheses
     Path(path).write_text(json.dumps(payload, indent=2))
