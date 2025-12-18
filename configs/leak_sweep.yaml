@@ -1,0 +1,9 @@
+{
+  "include": "configs/default.yaml",
+  "leak": {
+    "coefficient": 0.05,
+    "index": null,
+    "start_time": 60.0
+  },
+  "hypotheses": [5, 10, 15, 20, 25, 30]
+}
