@@ -10,6 +10,7 @@ public class Telemetry
     public float y1;
     public float y2;
     public float unc;
-    public float[] joints; // Joint angles [q1, q2, ...]
+    public float[] joints; // [q1, q2]
+    public float gripper;  // 0.0 (Open) to 1.0 (Closed)
     public string meta;
 }

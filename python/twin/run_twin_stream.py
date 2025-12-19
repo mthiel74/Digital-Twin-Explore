@@ -140,6 +140,12 @@ def main():
             # Recalculate u for derived info? Or just pass what we have.
             # We'll calculate derived stats from xhat
             d = arm.derived(xhat, None, t, p)
+            
+            # Simple Gripper Logic for Demo: Open/Close every few seconds
+            # Period = 4pi (approx 12s). 
+            # 0..1 range.
+            grip = 1.0 if math.sin(0.5 * t) > 0.5 else 0.0
+            
             return {
                 "t": float(t),
                 "x1": float(d["ee_x"]), # End effector X
@@ -148,6 +154,7 @@ def main():
                 "y1": float(y[0]), # Measured q1
                 "y2": float(y[1]), # Measured q2
                 "joints": [float(d["q1"]), float(d["q2"])],
+                "gripper": float(grip),
                 "meta": meta
             }
             

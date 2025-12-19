@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -16,10 +15,21 @@ public class RobotArmTelemetryClient : MonoBehaviour
     public Transform joint2; // Elbow
     
     [Header("Configuration")]
-    public Vector3 axis1 = Vector3.forward; // Rotate around Z for 2D planar
+    public Vector3 axis1 = Vector3.forward; 
     public Vector3 axis2 = Vector3.forward;
     public float offset1Degrees = 0f;
     public float offset2Degrees = 0f;
+
+    [Header("Gripper")]
+    public Transform finger1;
+    public Transform finger2;
+    // Assuming fingers move along X axis for open/close
+    // We will auto-detect open/closed positions in Start if not set? 
+    // No, simpler to just set limits.
+    // Let's assume the SceneBuilder sets them up correctly.
+    // Sliding range: 0.05 (open) to 0.0 (closed) relative to center? 
+    public float gripperOpenOffset = 0.05f;
+    public float gripperClosedOffset = 0.01f;
 
     private TcpClient _client;
     private NetworkStream _stream;
@@ -56,20 +66,34 @@ public class RobotArmTelemetryClient : MonoBehaviour
             }
         }
 
-        if (copy != null && copy.joints != null && copy.joints.Length >= 2)
+        if (copy != null)
         {
-            // Apply rotations
-            // Note: Ensure your Unity hierarchy is correct (Joint2 is child of Joint1's visual end, etc.)
-            if (joint1 != null)
+            if (copy.joints != null && copy.joints.Length >= 2)
             {
-                float angle = copy.joints[0] * Mathf.Rad2Deg + offset1Degrees;
-                joint1.localRotation = Quaternion.AngleAxis(angle, axis1);
+                if (joint1 != null)
+                {
+                    float angle = copy.joints[0] * Mathf.Rad2Deg + offset1Degrees;
+                    joint1.localRotation = Quaternion.AngleAxis(angle, axis1);
+                }
+                
+                if (joint2 != null)
+                {
+                    float angle = copy.joints[1] * Mathf.Rad2Deg + offset2Degrees;
+                    joint2.localRotation = Quaternion.AngleAxis(angle, axis2);
+                }
             }
             
-            if (joint2 != null)
+            // Gripper Animation
+            if (finger1 != null && finger2 != null)
             {
-                float angle = copy.joints[1] * Mathf.Rad2Deg + offset2Degrees;
-                joint2.localRotation = Quaternion.AngleAxis(angle, axis2);
+                // 0 = Open (Offset Large), 1 = Closed (Offset Small)
+                float t = Mathf.Clamp01(copy.gripper);
+                float pos = Mathf.Lerp(gripperOpenOffset, gripperClosedOffset, t);
+                
+                // Finger 1 moves +X, Finger 2 moves -X (or vice versa depending on setup)
+                // We'll assume local X is the sliding axis.
+                finger1.localPosition = new Vector3(pos, 0, 0);
+                finger2.localPosition = new Vector3(-pos, 0, 0);
             }
         }
     }
