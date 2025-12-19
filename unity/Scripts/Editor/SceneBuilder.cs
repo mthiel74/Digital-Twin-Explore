@@ -39,24 +39,28 @@ public class SceneBuilder : MonoBehaviour
         // Arm Link (Extends Up Y)
         GameObject armVis = GameObject.CreatePrimitive(PrimitiveType.Cube);
         armVis.transform.parent = j2.transform;
-        armVis.transform.localPosition = new Vector3(0, 0.5f, 0);
-        armVis.transform.localScale = new Vector3(0.3f, 1.0f, 0.3f); // Length 1, Thicker
+        armVis.transform.localPosition = new Vector3(0, 0.75f, 0); // Center at 0.75
+        armVis.transform.localScale = new Vector3(0.3f, 1.5f, 0.3f); // Length 1.5, Thicker
         
         // 5. Joint 3 (Elbow - Rotates X)
         GameObject j3 = new GameObject("Joint3_Elbow");
         j3.transform.parent = j2.transform;
-        j3.transform.localPosition = new Vector3(0, 1.0f, 0); // End of Arm
+        j3.transform.localPosition = new Vector3(0, 1.5f, 0); // End of Arm (1.5)
+        
+        GameObject elbowVis = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        elbowVis.transform.parent = j3.transform;
+        elbowVis.transform.localScale = Vector3.one * 0.4f;
         
         // Forearm Link (Extends Up Y)
         GameObject forearmVis = GameObject.CreatePrimitive(PrimitiveType.Cube);
         forearmVis.transform.parent = j3.transform;
-        forearmVis.transform.localPosition = new Vector3(0, 0.5f, 0);
-        forearmVis.transform.localScale = new Vector3(0.25f, 1.0f, 0.25f); // Length 1, Thicker
+        forearmVis.transform.localPosition = new Vector3(0, 0.75f, 0); // Center at 0.75
+        forearmVis.transform.localScale = new Vector3(0.25f, 1.5f, 0.25f); // Length 1.5, Thicker
         
         // 6. Wrist/Hand
         GameObject handPivot = new GameObject("Wrist");
         handPivot.transform.parent = j3.transform;
-        handPivot.transform.localPosition = new Vector3(0, 1.0f, 0); // End of Forearm
+        handPivot.transform.localPosition = new Vector3(0, 1.5f, 0); // End of Forearm (1.5)
         
         // Palm
         GameObject palm = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -80,7 +84,7 @@ public class SceneBuilder : MonoBehaviour
         // 7. Cargo Box
         GameObject cargo = GameObject.CreatePrimitive(PrimitiveType.Cube);
         cargo.name = "CargoBox";
-        cargo.transform.position = new Vector3(-0.8f, 0.2f, 0); // Moved to -0.8 (Other side)
+        cargo.transform.position = new Vector3(-1.5f, 0.2f, 0); // Moved to -1.5 (Longer reach)
         cargo.transform.localScale = Vector3.one * 0.3f;
         
         // 8. Configure Client

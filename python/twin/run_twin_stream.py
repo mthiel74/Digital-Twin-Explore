@@ -166,12 +166,11 @@ def main():
         x_true = np.array([0.0, 0.0, 0.0], dtype=float)
         
         # Scene State
-        box_pos = np.array([0.8, 0.2, 0.0], dtype=float) # Initial Box
+        box_pos = np.array([1.5, 0.2, 0.0], dtype=float) # Initial Box
         
         # Logic State - Mutable targets
-        # Start: Pick from A (0.8, 0, 0), Drop at B (-0.8, 0, 0)
-        current_pick = np.array([0.8, 0.2, 0.0], dtype=float)
-        current_drop = np.array([-0.8, 0.2, 0.0], dtype=float)
+        current_pick = np.array([1.5, 0.2, 0.0], dtype=float)
+        current_drop = np.array([-1.5, 0.2, 0.0], dtype=float)
         
         # State Machine
         sm_state = "MOVE_PICK_HOVER"
@@ -202,7 +201,8 @@ def main():
             
             # Logic
             target = np.copy(current_pick)
-            offset = np.array([0, 0.3, 0])
+            offset = np.array([0, 0.5, 0]) # Higher approach
+            grip_offset = np.array([0, 0.25, 0]) # Stop wrist above box
             dist = 0.0
             
             if sm_state == "MOVE_PICK_HOVER":
@@ -212,7 +212,7 @@ def main():
                 if dist < 0.2: sm_state = "DESCEND_PICK"
                 
             elif sm_state == "DESCEND_PICK":
-                target = current_pick
+                target = current_pick + grip_offset
                 gripper_cmd = 0.0
                 dist = np.linalg.norm(ee - target)
                 if dist < 0.15: 
@@ -220,7 +220,7 @@ def main():
                     sm_timer = t
             
             elif sm_state == "GRIP":
-                target = current_pick
+                target = current_pick + grip_offset
                 gripper_cmd = 1.0
                 dist = np.linalg.norm(ee - target)
                 if t - sm_timer > 1.0: sm_state = "LIFT_PICK"
@@ -238,7 +238,7 @@ def main():
                 if dist < 0.2: sm_state = "DESCEND_DROP"
                 
             elif sm_state == "DESCEND_DROP":
-                target = current_drop
+                target = current_drop + grip_offset
                 gripper_cmd = 1.0
                 dist = np.linalg.norm(ee - target)
                 if dist < 0.15: 
@@ -246,7 +246,7 @@ def main():
                     sm_timer = t
                     
             elif sm_state == "RELEASE":
-                target = current_drop
+                target = current_drop + grip_offset
                 gripper_cmd = 0.0
                 dist = np.linalg.norm(ee - target)
                 if t - sm_timer > 1.0: 
@@ -273,10 +273,12 @@ def main():
             
             # Physics: If gripped and close, move box
             if gripper_cmd > 0.5:
-                # Naive attach
+                # Attach check uses Wrist Position (ee) vs Box Center
+                # If Wrist is at Box + GripOffset, distance is length(GripOffset) = 0.25
                 dist_to_box = np.linalg.norm(ee - box_pos)
-                if dist_to_box < 0.25: # Forgiving attach distance
-                    box_pos[:] = ee[:] # Box follows EE
+                if dist_to_box < 0.4: # Increased threshold to catch it
+                    # Box follows Wrist - GripOffset
+                    box_pos[:] = ee[:] - grip_offset
             
             # Debug Print
             if (int(t * 100) % 100) == 0:

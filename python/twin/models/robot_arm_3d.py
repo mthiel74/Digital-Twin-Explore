@@ -5,8 +5,8 @@ from typing import Optional, Dict, Tuple
 
 @dataclass
 class Arm3DParams:
-    l1: float = 1.0  # Length of upper arm
-    l2: float = 1.0  # Length of forearm
+    l1: float = 1.5  # Length of upper arm
+    l2: float = 1.5  # Length of forearm
     # Base height offset (Unity: 0.2 (Base) + 0.4 (Turret offset) = 0.6)
     base_h: float = 0.6 
 
