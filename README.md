@@ -139,9 +139,10 @@ python -m twin.run_twin_stream --model arm3d --port 5555 --hz 50
 
 **Want Realistic Visuals?**
 The demo uses basic Unity primitives (cylinders, cubes). To upgrade to professional-looking 3D models with realistic materials:
-- See **[Realistic Assets Guide](docs/REALISTIC_ASSETS.md)** for step-by-step instructions
+- **Complete Unity Beginner?** Start with **[Unity Beginner Walkthrough](docs/UNITY_BEGINNER_WALKTHROUGH.md)** - Creates a new project from scratch with realistic assets
+- **Have Unity Experience?** See **[Realistic Assets Guide](docs/REALISTIC_ASSETS.md)** for asset upgrade instructions
 - Use free assets from Unity Asset Store, Sketchfab, or TurboSquid
-- Takes 30-60 minutes, makes your demo publication-ready
+- Takes 1-2 hours for beginners, 30-60 minutes if you know Unity
 
 ---
 
