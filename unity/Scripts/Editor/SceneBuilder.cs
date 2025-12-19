@@ -87,6 +87,14 @@ public class SceneBuilder : MonoBehaviour
         cargo.transform.position = new Vector3(-1.5f, 0.2f, 0); // Moved to -1.5 (Longer reach)
         cargo.transform.localScale = Vector3.one * 0.3f;
         
+        // Add a Handle
+        GameObject handle = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        handle.name = "Handle";
+        handle.transform.parent = cargo.transform;
+        handle.transform.localPosition = new Vector3(0, 0.6f, 0); // Top of box
+        handle.transform.localScale = new Vector3(0.4f, 0.2f, 0.4f); // Small grab point
+        handle.transform.localRotation = Quaternion.identity;
+        
         // 8. Configure Client
         RobotArmTelemetryClient client = robot.AddComponent<RobotArmTelemetryClient>();
         client.joint1 = j1.transform;

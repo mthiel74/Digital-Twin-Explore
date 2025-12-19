@@ -201,8 +201,8 @@ def main():
             
             # Logic
             target = np.copy(current_pick)
-            offset = np.array([0, 0.5, 0]) # Higher approach
-            grip_offset = np.array([0, 0.25, 0]) # Stop wrist above box
+            offset = np.array([0, 0.8, 0]) # Higher Lift
+            grip_offset = np.array([0, 0.45, 0]) # Grab the Handle (High)
             dist = 0.0
             
             if sm_state == "MOVE_PICK_HOVER":
@@ -257,13 +257,21 @@ def main():
                 gripper_cmd = 0.0
                 dist = np.linalg.norm(ee - target)
                 if dist < 0.2:
+                    sm_state = "GO_HOME"
+                    sm_timer = t
+            
+            elif sm_state == "GO_HOME":
+                target = np.array([0, 2.5, 0]) # High Rest Position
+                gripper_cmd = 0.0
+                dist = np.linalg.norm(ee - target)
+                if dist < 0.5 and (t - sm_timer > 1.0):
                     sm_state = "SWAP_ROLES"
                     sm_timer = t
             
             elif sm_state == "SWAP_ROLES":
-                # Stay hovering at drop location for a moment
-                target = current_drop + offset
-                if t - sm_timer > 1.0:
+                # Stay hovering at Home
+                target = np.array([0, 2.5, 0])
+                if t - sm_timer > 0.5:
                     # Swap targets for next cycle
                     temp = np.copy(current_pick)
                     current_pick[:] = current_drop[:]
@@ -273,11 +281,9 @@ def main():
             
             # Physics: If gripped and close, move box
             if gripper_cmd > 0.5:
-                # Attach check uses Wrist Position (ee) vs Box Center
-                # If Wrist is at Box + GripOffset, distance is length(GripOffset) = 0.25
+                # Naive attach
                 dist_to_box = np.linalg.norm(ee - box_pos)
-                if dist_to_box < 0.4: # Increased threshold to catch it
-                    # Box follows Wrist - GripOffset
+                if dist_to_box < 0.6: # Forgiving attach distance (Handle is high)
                     box_pos[:] = ee[:] - grip_offset
             
             # Debug Print
