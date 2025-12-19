@@ -249,11 +249,9 @@ The video below demonstrates the **Digital Twin** system in action, showing a 2-
 
 This showcases the core digital twin workflow: a computational model (Python) synchronized to a visualization layer (Unity) via real-time data streaming, enabling state estimation, prediction, and decision-making.
 
-<video src="docs/images/robot_arm_demo.mov" controls width="800">
-  Your browser does not support the video tag. <a href="docs/images/robot_arm_demo.mov">Download the video</a>.
-</video>
+![Robot Arm Digital Twin Demo](docs/images/robot_arm_demo.gif)
 
-> **Tip**: Click the video to play. If it doesn't display, you can [view it directly](docs/images/robot_arm_demo.mov).
+> **Tip**: The animation loops continuously. The original high-quality video is also available: [robot_arm_demo.mov](docs/images/robot_arm_demo.mov)
 
 ---
 
