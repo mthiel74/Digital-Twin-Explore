@@ -181,12 +181,15 @@ def main():
                 xhat = x_true.copy()
                 yhat = y_true.copy()
                 r = y - yhat
+                unc = 0.0
             else:
                 filt.predict(u=u, t=t, dt=dt)
                 yhat, r = filt.update(y=y, t=t)
                 xhat = filt.x.copy()
+                unc = np.trace(filt.P)
 
             rec = pack(xhat, y, t)
+            rec["unc"] = float(unc)
             # Add debug fields for evaluation
             rec["x_true"] = x_true.astype(float).tolist()
             rec["x_hat"] = xhat.astype(float).tolist()

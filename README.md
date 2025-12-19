@@ -66,6 +66,18 @@ python -m twin.run_twin_stream --model msd --filter ekf --port 5555 --hz 50 --lo
 
 See: `unity/README_Unity_Setup.md`
 
+### Headless Mode (No Unity)
+To run the simulation and logging without a Unity connection:
+```bash
+python -m twin.run_twin_stream --headless --seconds 10 --log out/run.jsonl
+```
+
+### 3D Animation (Python)
+To generate a 3D animation (GIF) from a recorded log:
+```bash
+python -m eval.animate_msd --log out/run.jsonl --out out/animation.gif
+```
+
 ---
 
 ## Core project patterns (choose one)
