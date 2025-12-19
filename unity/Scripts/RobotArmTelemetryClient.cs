@@ -40,6 +40,10 @@ public class RobotArmTelemetryClient : MonoBehaviour
     private volatile bool _running;
     private readonly object _lock = new object();
     private Telemetry _latest = null;
+    
+    // Initial finger positions to preserve Y/Z offsets
+    private Vector3 f1Init;
+    private Vector3 f2Init;
 
     void Start()
     {
@@ -47,6 +51,9 @@ public class RobotArmTelemetryClient : MonoBehaviour
              GameObject c = GameObject.Find("CargoBox");
              if (c != null) cargo = c.transform;
         }
+        
+        if (finger1 != null) f1Init = finger1.localPosition;
+        if (finger2 != null) f2Init = finger2.localPosition;
         
         _running = true;
         _thread = new Thread(Worker);
@@ -95,9 +102,9 @@ public class RobotArmTelemetryClient : MonoBehaviour
                 float t = Mathf.Clamp01(copy.gripper);
                 float pos = Mathf.Lerp(gripperOpenOffset, gripperClosedOffset, t);
                 
-                // Assuming Fingers move along X
-                finger1.localPosition = new Vector3(pos, 0, 0);
-                finger2.localPosition = new Vector3(-pos, 0, 0);
+                // Assuming Fingers move along X, preserve Y/Z
+                finger1.localPosition = new Vector3(pos, f1Init.y, f1Init.z);
+                finger2.localPosition = new Vector3(-pos, f2Init.y, f2Init.z);
             }
             
             // Cargo
