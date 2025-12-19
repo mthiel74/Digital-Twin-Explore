@@ -166,9 +166,12 @@ def main():
         x_true = np.array([0.0, 0.0, 0.0], dtype=float)
         
         # Scene State
-        box_pos = np.array([0.8, 0.2, 0.0], dtype=float) # Initial
-        pick_loc = np.array([0.8, 0.2, 0.0], dtype=float)
-        drop_loc = np.array([0.0, 0.2, 0.8], dtype=float)
+        box_pos = np.array([0.8, 0.2, 0.0], dtype=float) # Initial Box
+        
+        # Logic State - Mutable targets
+        # Start: Pick from A (0.8, 0, 0), Drop at B (-0.8, 0, 0)
+        current_pick = np.array([0.8, 0.2, 0.0], dtype=float)
+        current_drop = np.array([-0.8, 0.2, 0.0], dtype=float)
         
         # State Machine
         sm_state = "MOVE_PICK_HOVER"
@@ -192,24 +195,24 @@ def main():
         meta = "arm3d"
 
         def controller(t, x):
-            nonlocal sm_state, sm_timer, gripper_cmd, box_pos
+            nonlocal sm_state, sm_timer, gripper_cmd, box_pos, current_pick, current_drop
             
             # EE position
             ee = arm3d.forward_kinematics(x, p)
             
             # Logic
-            target = np.copy(pick_loc)
+            target = np.copy(current_pick)
             offset = np.array([0, 0.3, 0])
             dist = 0.0
             
             if sm_state == "MOVE_PICK_HOVER":
-                target = pick_loc + offset
+                target = current_pick + offset
                 gripper_cmd = 0.0
                 dist = np.linalg.norm(ee - target)
                 if dist < 0.2: sm_state = "DESCEND_PICK"
                 
             elif sm_state == "DESCEND_PICK":
-                target = pick_loc
+                target = current_pick
                 gripper_cmd = 0.0
                 dist = np.linalg.norm(ee - target)
                 if dist < 0.15: 
@@ -217,25 +220,25 @@ def main():
                     sm_timer = t
             
             elif sm_state == "GRIP":
-                target = pick_loc
+                target = current_pick
                 gripper_cmd = 1.0
                 dist = np.linalg.norm(ee - target)
                 if t - sm_timer > 1.0: sm_state = "LIFT_PICK"
                 
             elif sm_state == "LIFT_PICK":
-                target = pick_loc + offset
+                target = current_pick + offset
                 gripper_cmd = 1.0
                 dist = np.linalg.norm(ee - target)
                 if dist < 0.2: sm_state = "MOVE_DROP_HOVER"
                 
             elif sm_state == "MOVE_DROP_HOVER":
-                target = drop_loc + offset
+                target = current_drop + offset
                 gripper_cmd = 1.0
                 dist = np.linalg.norm(ee - target)
                 if dist < 0.2: sm_state = "DESCEND_DROP"
                 
             elif sm_state == "DESCEND_DROP":
-                target = drop_loc
+                target = current_drop
                 gripper_cmd = 1.0
                 dist = np.linalg.norm(ee - target)
                 if dist < 0.15: 
@@ -243,26 +246,29 @@ def main():
                     sm_timer = t
                     
             elif sm_state == "RELEASE":
-                target = drop_loc
+                target = current_drop
                 gripper_cmd = 0.0
                 dist = np.linalg.norm(ee - target)
                 if t - sm_timer > 1.0: 
                     sm_state = "LIFT_DROP"
             
             elif sm_state == "LIFT_DROP":
-                target = drop_loc + offset
+                target = current_drop + offset
                 gripper_cmd = 0.0
                 dist = np.linalg.norm(ee - target)
                 if dist < 0.2:
-                    sm_state = "RESET"
+                    sm_state = "SWAP_ROLES"
                     sm_timer = t
             
-            elif sm_state == "RESET":
-                target = drop_loc + offset
-                dist = np.linalg.norm(ee - target)
-                if t - sm_timer > 2.0:
-                    # Reset box
-                    box_pos[:] = pick_loc[:]
+            elif sm_state == "SWAP_ROLES":
+                # Stay hovering at drop location for a moment
+                target = current_drop + offset
+                if t - sm_timer > 1.0:
+                    # Swap targets for next cycle
+                    temp = np.copy(current_pick)
+                    current_pick[:] = current_drop[:]
+                    current_drop[:] = temp
+                    
                     sm_state = "MOVE_PICK_HOVER"
             
             # Physics: If gripped and close, move box
@@ -273,8 +279,6 @@ def main():
                     box_pos[:] = ee[:] # Box follows EE
             
             # Debug Print
-            nonlocal k # We can access k from outer scope if we passed it? No.
-            # Just print every 1.0s based on t
             if (int(t * 100) % 100) == 0:
                  print(f"[Ctrl] {sm_state} | Dist: {dist:.3f} | BoxDist: {np.linalg.norm(ee - box_pos):.3f}")
 
