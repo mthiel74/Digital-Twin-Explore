@@ -11,25 +11,28 @@ public class RobotArmTelemetryClient : MonoBehaviour
     public int port = 5555;
 
     [Header("Arm Joints")]
-    public Transform joint1; // Base/Shoulder
-    public Transform joint2; // Elbow
+    public Transform joint1; // Base Turret (Rotates Y)
+    public Transform joint2; // Shoulder (Rotates X)
+    public Transform joint3; // Elbow (Rotates X)
     
     [Header("Configuration")]
-    public Vector3 axis1 = Vector3.forward; 
-    public Vector3 axis2 = Vector3.forward;
+    // Defaults for 3D arm
+    public Vector3 axis1 = Vector3.up; 
+    public Vector3 axis2 = Vector3.right;
+    public Vector3 axis3 = Vector3.right;
+    
     public float offset1Degrees = 0f;
     public float offset2Degrees = 0f;
+    public float offset3Degrees = 0f;
 
     [Header("Gripper")]
     public Transform finger1;
     public Transform finger2;
-    // Assuming fingers move along X axis for open/close
-    // We will auto-detect open/closed positions in Start if not set? 
-    // No, simpler to just set limits.
-    // Let's assume the SceneBuilder sets them up correctly.
-    // Sliding range: 0.05 (open) to 0.0 (closed) relative to center? 
-    public float gripperOpenOffset = 0.05f;
-    public float gripperClosedOffset = 0.01f;
+    public float gripperOpenOffset = 0.08f;
+    public float gripperClosedOffset = 0.02f;
+    
+    [Header("Cargo")]
+    public Transform cargo;
 
     private TcpClient _client;
     private NetworkStream _stream;
@@ -40,6 +43,11 @@ public class RobotArmTelemetryClient : MonoBehaviour
 
     void Start()
     {
+        if (cargo == null) {
+             GameObject c = GameObject.Find("CargoBox");
+             if (c != null) cargo = c.transform;
+        }
+        
         _running = true;
         _thread = new Thread(Worker);
         _thread.IsBackground = true;
@@ -68,32 +76,38 @@ public class RobotArmTelemetryClient : MonoBehaviour
 
         if (copy != null)
         {
-            if (copy.joints != null && copy.joints.Length >= 2)
+            // Joints
+            if (copy.joints != null)
             {
-                if (joint1 != null)
-                {
-                    float angle = copy.joints[0] * Mathf.Rad2Deg + offset1Degrees;
-                    joint1.localRotation = Quaternion.AngleAxis(angle, axis1);
-                }
+                if (joint1 != null && copy.joints.Length >= 1)
+                    joint1.localRotation = Quaternion.AngleAxis(copy.joints[0] * Mathf.Rad2Deg + offset1Degrees, axis1);
                 
-                if (joint2 != null)
-                {
-                    float angle = copy.joints[1] * Mathf.Rad2Deg + offset2Degrees;
-                    joint2.localRotation = Quaternion.AngleAxis(angle, axis2);
-                }
+                if (joint2 != null && copy.joints.Length >= 2)
+                    joint2.localRotation = Quaternion.AngleAxis(copy.joints[1] * Mathf.Rad2Deg + offset2Degrees, axis2);
+                    
+                if (joint3 != null && copy.joints.Length >= 3)
+                    joint3.localRotation = Quaternion.AngleAxis(copy.joints[2] * Mathf.Rad2Deg + offset3Degrees, axis3);
             }
             
-            // Gripper Animation
+            // Gripper
             if (finger1 != null && finger2 != null)
             {
-                // 0 = Open (Offset Large), 1 = Closed (Offset Small)
                 float t = Mathf.Clamp01(copy.gripper);
                 float pos = Mathf.Lerp(gripperOpenOffset, gripperClosedOffset, t);
                 
-                // Finger 1 moves +X, Finger 2 moves -X (or vice versa depending on setup)
-                // We'll assume local X is the sliding axis.
+                // Assuming Fingers move along X
                 finger1.localPosition = new Vector3(pos, 0, 0);
                 finger2.localPosition = new Vector3(-pos, 0, 0);
+            }
+            
+            // Cargo
+            if (cargo != null && copy.boxPos != null && copy.boxPos.Length >= 3)
+            {
+                cargo.position = new Vector3(copy.boxPos[0], copy.boxPos[1], copy.boxPos[2]);
+                if (copy.boxRot != null && copy.boxRot.Length >= 4)
+                {
+                    cargo.rotation = new Quaternion(copy.boxRot[0], copy.boxRot[1], copy.boxRot[2], copy.boxRot[3]);
+                }
             }
         }
     }
@@ -152,7 +166,7 @@ public class RobotArmTelemetryClient : MonoBehaviour
                         }
                         catch (Exception)
                         {
-                            // Ignore malformed
+                            // Ignore
                         }
                     }
                 }

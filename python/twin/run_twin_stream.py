@@ -23,6 +23,9 @@ import twin.models.thermal_rc as trc
 from twin.models.robot_arm import ArmParams
 import twin.models.robot_arm as arm
 
+from twin.models.robot_arm_3d import Arm3DParams
+import twin.models.robot_arm_3d as arm3d
+
 
 def tcp_send_loop(host: str, port: int):
     srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -42,7 +45,7 @@ def main():
     ap.add_argument("--port", type=int, default=5555)
     ap.add_argument("--hz", type=float, default=50.0)
     ap.add_argument("--seconds", type=float, default=0.0, help="0 means run forever")
-    ap.add_argument("--model", choices=["msd", "thermal", "arm"], default="msd")
+    ap.add_argument("--model", choices=["msd", "thermal", "arm", "arm3d"], default="msd")
     ap.add_argument("--filter", choices=["ekf", "ukf", "none"], default="ekf")
     ap.add_argument("--log", default="", help="JSONL log path, e.g. out/run.jsonl")
     ap.add_argument("--noise_y", type=float, default=0.02, help="measurement noise std")
@@ -158,6 +161,131 @@ def main():
                 "meta": meta
             }
             
+    elif args.model == "arm3d":
+        p = Arm3DParams()
+        x_true = np.array([0.0, 0.0, 0.0], dtype=float)
+        
+        # Scene State
+        box_pos = np.array([0.8, 0.2, 0.0], dtype=float) # Initial
+        pick_loc = np.array([0.8, 0.2, 0.0], dtype=float)
+        drop_loc = np.array([0.0, 0.2, 0.8], dtype=float)
+        
+        # State Machine
+        sm_state = "MOVE_PICK_HOVER"
+        sm_timer = 0.0
+        gripper_cmd = 0.0
+        
+        def f(x, u, t, dt):
+            # Kinematic servo dynamics: x_dot = gain * (u - x)
+            gain = 3.0
+            return x + gain * (u - x) * dt
+
+        def h(x, t):
+            return x
+
+        n = 3
+        m = 3
+        Q = np.eye(3) * 1e-4
+        R = np.eye(3) * (args.noise_y**2)
+        x0 = np.zeros(3)
+        P0 = np.eye(3) * 0.1
+        meta = "arm3d"
+
+        def controller(t, x):
+            nonlocal sm_state, sm_timer, gripper_cmd, box_pos
+            
+            # EE position
+            ee = arm3d.forward_kinematics(x, p)
+            
+            # Logic
+            target = np.copy(pick_loc)
+            offset = np.array([0, 0.3, 0])
+            
+            if sm_state == "MOVE_PICK_HOVER":
+                target = pick_loc + offset
+                gripper_cmd = 0.0
+                dist = np.linalg.norm(ee - target)
+                if dist < 0.1: sm_state = "DESCEND_PICK"
+                
+            elif sm_state == "DESCEND_PICK":
+                target = pick_loc
+                gripper_cmd = 0.0
+                dist = np.linalg.norm(ee - target)
+                if dist < 0.05: 
+                    sm_state = "GRIP"
+                    sm_timer = t
+            
+            elif sm_state == "GRIP":
+                target = pick_loc
+                gripper_cmd = 1.0
+                if t - sm_timer > 1.0: sm_state = "LIFT_PICK"
+                
+            elif sm_state == "LIFT_PICK":
+                target = pick_loc + offset
+                gripper_cmd = 1.0
+                dist = np.linalg.norm(ee - target)
+                if dist < 0.1: sm_state = "MOVE_DROP_HOVER"
+                
+            elif sm_state == "MOVE_DROP_HOVER":
+                target = drop_loc + offset
+                gripper_cmd = 1.0
+                dist = np.linalg.norm(ee - target)
+                if dist < 0.1: sm_state = "DESCEND_DROP"
+                
+            elif sm_state == "DESCEND_DROP":
+                target = drop_loc
+                gripper_cmd = 1.0
+                dist = np.linalg.norm(ee - target)
+                if dist < 0.05: 
+                    sm_state = "RELEASE"
+                    sm_timer = t
+                    
+            elif sm_state == "RELEASE":
+                target = drop_loc
+                gripper_cmd = 0.0
+                if t - sm_timer > 1.0: 
+                    sm_state = "LIFT_DROP"
+                    # Teleport box back for loop? Or leave it.
+                    # Let's teleport it back to pick loc after a while so loop repeats forever
+            
+            elif sm_state == "LIFT_DROP":
+                target = drop_loc + offset
+                gripper_cmd = 0.0
+                if np.linalg.norm(ee - target) < 0.1:
+                    sm_state = "RESET"
+                    sm_timer = t
+            
+            elif sm_state == "RESET":
+                target = drop_loc + offset
+                if t - sm_timer > 2.0:
+                    # Reset box
+                    box_pos[:] = pick_loc[:]
+                    sm_state = "MOVE_PICK_HOVER"
+            
+            # Physics: If gripped and close, move box
+            if gripper_cmd > 0.5:
+                # Naive attach
+                # If we are in GRIP/LIFT/MOVE/DESCEND states
+                dist_to_box = np.linalg.norm(ee - box_pos)
+                if dist_to_box < 0.2:
+                    box_pos[:] = ee[:] # Box follows EE
+            
+            # IK
+            q_des = arm3d.inverse_kinematics(target, p)
+            return q_des
+
+        def pack(xhat, y, t):
+            d = arm3d.forward_kinematics(xhat, p)
+            return {
+                "t": float(t),
+                "x1": float(d[0]), "x2": float(d[1]), "x3": float(d[2]),
+                "y1": float(y[0]), "y2": float(y[1]),
+                "joints": [float(v) for v in xhat],
+                "gripper": float(gripper_cmd),
+                "boxPos": [float(v) for v in box_pos],
+                "meta": meta
+            }
+            
     else:  # thermal
         p = ThermalRCParams()
         x_true = np.array([20.0], dtype=float)
@@ -254,6 +382,8 @@ def main():
                 # 'p' is available from the scope above.
                 tau = p.kp * (q_des - q) + p.kd * (dq_des - dq)
                 u = tau
+            elif args.model == "arm3d":
+                u = controller(t, x_true)
 
             # Propagate true system
             x_true = f(x_true, u, t, dt)

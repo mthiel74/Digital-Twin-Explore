@@ -115,6 +115,25 @@ cd python
 python -m twin.run_twin_stream --model arm --port 5555 --hz 50
 ```
 
+**Visualize (Unity):**
+1. Create a Cylinder (Joint1) and a child Cylinder (Joint2).
+2. Attach `RobotArmTelemetryClient.cs` to a manager object.
+3. Drag the cylinders into `Joint1` and `Joint2` fields.
+4. Set `Axis1` and `Axis2` to `(0, 0, 1)` (Z-axis).
+
+### 3D Pick-and-Place Arm (New!)
+A 3-DOF arm that performs a pick-and-place task using Inverse Kinematics.
+
+**Run Simulation:**
+```bash
+python -m twin.run_twin_stream --model arm3d --port 5555 --hz 50
+```
+
+**Visualize (Unity):**
+1. Run **DigitalTwin > Setup Robot Arm Scene**.
+2. Press **Play**.
+3. Run the python script above.
+
 ---
 
 ## Core project patterns (choose one)
