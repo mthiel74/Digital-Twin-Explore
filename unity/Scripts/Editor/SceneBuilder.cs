@@ -47,23 +47,20 @@ public class SceneBuilder : MonoBehaviour
         
         GameObject link1Vis = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
         link1Vis.transform.parent = link1Pivot.transform;
-        link1Vis.transform.localPosition = new Vector3(0, 0.5f, 0); // Move up so pivot is at base
-        link1Vis.transform.localScale = new Vector3(0.1f, 0.5f, 0.1f); // 1 unit long
-        link1Vis.transform.localRotation = Quaternion.Euler(0, 0, 90); // Lay flat along X?
-        // Let's stick to the Python model:
-        // q1 is angle from X axis.
-        // So at q1=0, it points along X.
-        // Default Cylinder points along Y.
+        // Fix: Position along X (0.5), Center at Y=0. 
+        link1Vis.transform.localPosition = new Vector3(0.5f, 0, 0); 
+        link1Vis.transform.localScale = new Vector3(0.1f, 0.5f, 0.1f); // Length 1 (Scale Y=0.5)
         link1Vis.transform.localRotation = Quaternion.Euler(0, 0, -90); // Point along X
         
         // --- Link 2 ---
         GameObject link2Pivot = new GameObject("Link2_Pivot");
         link2Pivot.transform.parent = link1Pivot.transform;
-        link2Pivot.transform.localPosition = new Vector3(1.0f, 0, 0); // At end of Link 1 (length=1)
+        link2Pivot.transform.localPosition = new Vector3(1.0f, 0, 0); // At end of Link 1
         
         GameObject link2Vis = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
         link2Vis.transform.parent = link2Pivot.transform;
-        link2Vis.transform.localPosition = new Vector3(0.5f, 0, 0); // Center at 0.5 (length=1)
+        // Fix: Position along X (0.5)
+        link2Vis.transform.localPosition = new Vector3(0.5f, 0, 0);
         link2Vis.transform.localScale = new Vector3(0.1f, 0.5f, 0.1f);
         link2Vis.transform.localRotation = Quaternion.Euler(0, 0, -90); // Point along X
         
