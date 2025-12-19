@@ -263,6 +263,8 @@ This showcases the core digital twin workflow: a computational model (Python) sy
 
 > **Tip**: The animation loops continuously. The original high-quality video is also available: [robot_arm_demo.mov](docs/images/robot_arm_demo.mov)
 
+**AI-Enhanced Version**: The Unity simulation was also processed through **Runway GEN-3 Alpha Turbo** (video-to-video) to explore how generative AI interprets physics simulations. See the comparison in the experimental videos section below.
+
 ---
 
 Here is the Digital Twin in action (Headless Python Mode):
@@ -282,6 +284,20 @@ The plot below shows the position tracking. The Twin (red dashed) closely follow
 The new `arm` model simulates a 2-link planar robot performing a dance.
 
 ![Arm Animation](docs/images/example_arm.gif)
+
+---
+
+## Experimental: AI Video Enhancement
+
+The robot arm demo was processed through **Runway's GEN-3 Alpha Turbo** (video-to-video model) to explore how generative AI interprets physics-based simulations.
+
+**Key Observations**:
+- The AI model adds cinematic quality and texture detail
+- Physics behavior is preserved through temporal consistency
+- Visual artifacts appear where geometry is ambiguous (e.g., gripper-handle interaction)
+- **Limitation**: Neither the Unity original nor the AI version shows perfect handle grasping—the physics simulation is correct, but visual alignment needs refinement
+
+This experiment demonstrates that **generative AI enhances aesthetics** while **physics-based models ensure trustworthy predictions**—they're complementary, not competing approaches.
 
 ---
 
