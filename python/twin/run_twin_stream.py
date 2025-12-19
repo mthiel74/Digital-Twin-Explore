@@ -44,6 +44,7 @@ def main():
     ap.add_argument("--log", default="", help="JSONL log path, e.g. out/run.jsonl")
     ap.add_argument("--noise_y", type=float, default=0.02, help="measurement noise std")
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--headless", action="store_true", help="Run without TCP client (simulation only)")
     args = ap.parse_args()
 
     np.random.seed(args.seed)
@@ -143,7 +144,12 @@ def main():
         filt = UKF(x=x0.copy(), P=P0.copy(), Q=Q, R=R, f=f, h=h)
 
     # Start TCP server
-    srv, conn = tcp_send_loop(args.host, args.port)
+    srv = None
+    conn = None
+    if not args.headless:
+        srv, conn = tcp_send_loop(args.host, args.port)
+    else:
+        print("[twin] Running in headless mode (no TCP server)")
 
     # Main loop
     try:
@@ -188,7 +194,8 @@ def main():
             rec["resid"] = r.astype(float).tolist()
 
             line = json.dumps(rec) + "\n"
-            conn.sendall(line.encode("utf-8"))
+            if conn:
+                conn.sendall(line.encode("utf-8"))
 
             if args.log:
                 append_jsonl(args.log, rec)
@@ -198,13 +205,15 @@ def main():
 
     except (BrokenPipeError, ConnectionResetError):
         print("[twin] Unity disconnected.")
+    except KeyboardInterrupt:
+        print("[twin] Interrupted by user.")
     finally:
         try:
-            conn.close()
+            if conn: conn.close()
         except Exception:
             pass
         try:
-            srv.close()
+            if srv: srv.close()
         except Exception:
             pass
 
