@@ -21,7 +21,7 @@ public class RobotArmTelemetryClient : MonoBehaviour
     public Vector3 axis2 = Vector3.right;
     public Vector3 axis3 = Vector3.right;
     
-    public float offset1Degrees = 0f;
+    public float offset1Degrees = 180f;
     public float offset2Degrees = -90f; // Correct for Vertical(Unity) vs Horizontal(Python)
     public float offset3Degrees = 0f;
 

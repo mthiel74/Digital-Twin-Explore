@@ -36,10 +36,6 @@ public class SceneBuilder : MonoBehaviour
         j2.transform.parent = j1.transform;
         j2.transform.localPosition = new Vector3(0, 0.4f, 0); // Top of turret
         
-        GameObject shoulderVis = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        shoulderVis.transform.parent = j2.transform;
-        shoulderVis.transform.localScale = Vector3.one * 0.5f;
-        
         // Arm Link (Extends Up Y)
         GameObject armVis = GameObject.CreatePrimitive(PrimitiveType.Cube);
         armVis.transform.parent = j2.transform;
@@ -50,10 +46,6 @@ public class SceneBuilder : MonoBehaviour
         GameObject j3 = new GameObject("Joint3_Elbow");
         j3.transform.parent = j2.transform;
         j3.transform.localPosition = new Vector3(0, 1.0f, 0); // End of Arm
-        
-        GameObject elbowVis = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        elbowVis.transform.parent = j3.transform;
-        elbowVis.transform.localScale = Vector3.one * 0.4f;
         
         // Forearm Link (Extends Up Y)
         GameObject forearmVis = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -88,7 +80,7 @@ public class SceneBuilder : MonoBehaviour
         // 7. Cargo Box
         GameObject cargo = GameObject.CreatePrimitive(PrimitiveType.Cube);
         cargo.name = "CargoBox";
-        cargo.transform.position = new Vector3(0.8f, 0.2f, 0);
+        cargo.transform.position = new Vector3(-0.8f, 0.2f, 0); // Moved to -0.8 (Other side)
         cargo.transform.localScale = Vector3.one * 0.3f;
         
         // 8. Configure Client
