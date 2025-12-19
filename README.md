@@ -91,7 +91,7 @@ python -m eval.animate_msd --log out/run.jsonl --out out/animation.gif
 ### Pattern B — “Hybrid physics + ML residual”
 Model:
 \[
-x_{k+1} = f(x_k, u_k; \theta) + \Delta f_\phi(x_k,u_k)
+ x_{k+1} = f(x_k, u_k; \theta) + \Delta f_\phi(x_k,u_k)
 \]
 - Start with a physics model.
 - Learn a small residual model \(\Delta f_\phi\) on CPU (tiny MLP / ridge / kernel).
@@ -179,7 +179,23 @@ digital-twin-starter-kit/
 
 ---
 
+## Example Output
+
+Here is the Digital Twin in action (Headless Python Mode):
+
+### 3D Animation
+The blue box represents the **True System** (simulating physics + unknown disturbances).
+The red dashed box is the **Digital Twin** (using EKF to estimate state from noisy sensor data).
+
+![Animation](docs/images/example_animation.gif)
+
+### Telemetry Traces
+The plot below shows the position tracking. The Twin (red dashed) closely follows the measurements (blue line) and the underlying true state, filtering out noise.
+
+![Traces](docs/images/example_traces.png)
+
+---
+
 ## Notes
 - This repo intentionally avoids heavy dependencies and GPUs.
 - The Unity side is deliberately minimal; expand it into a dashboard (UI, plots, uncertainty bands) as needed.
-
