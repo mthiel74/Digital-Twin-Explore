@@ -95,10 +95,9 @@ python -m eval.animate_arm --log out/arm_run.jsonl --out out/arm_animation.gif
 ```
 
 **Visualize (Unity):**
-1. Create a Cylinder (Joint1) and a child Cylinder (Joint2).
-2. Attach `RobotArmTelemetryClient.cs` to a manager object.
-3. Drag the cylinders into `Joint1` and `Joint2` fields.
-4. Set `Axis1` and `Axis2` to `(0, 0, 1)` (Z-axis).
+1. Open the project in Unity.
+2. In the top menu, click **DigitalTwin > Setup Robot Arm Scene**.
+3. Press **Play**.
 
 ---
 
