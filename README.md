@@ -237,6 +237,26 @@ digital-twin-starter-kit/
 
 ## Example Output
 
+### Robot Arm Digital Twin Demo (Unity + Python)
+
+The video below demonstrates the **Digital Twin** system in action, showing a 2-link planar robot arm synchronized in real-time between Python (physics simulation + state estimation) and Unity (3D visualization).
+
+**What you're seeing:**
+- **Unity Visualization**: The 3D robot arm rendering updates in real-time based on telemetry streamed from Python
+- **Physics Simulation**: Python runs a full dynamics model (mass matrix, Coriolis forces, gravity) using RK4 integration
+- **State Estimation**: Extended Kalman Filter (EKF) estimates joint angles from noisy sensor measurements
+- **Telemetry Pipeline**: JSON data streams over TCP at 50Hz, demonstrating the digital twin "spine"
+
+This showcases the core digital twin workflow: a computational model (Python) synchronized to a visualization layer (Unity) via real-time data streaming, enabling state estimation, prediction, and decision-making.
+
+<video src="docs/images/robot_arm_demo.mov" controls width="800">
+  Your browser does not support the video tag. <a href="docs/images/robot_arm_demo.mov">Download the video</a>.
+</video>
+
+> **Tip**: Click the video to play. If it doesn't display, you can [view it directly](docs/images/robot_arm_demo.mov).
+
+---
+
 Here is the Digital Twin in action (Headless Python Mode):
 
 ### 3D Animation (Mass-Spring-Damper)
