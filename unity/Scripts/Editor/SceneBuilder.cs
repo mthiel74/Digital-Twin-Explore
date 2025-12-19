@@ -47,10 +47,6 @@ public class SceneBuilder : MonoBehaviour
         j3.transform.parent = j2.transform;
         j3.transform.localPosition = new Vector3(0, 1.5f, 0); // End of Arm (1.5)
         
-        GameObject elbowVis = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        elbowVis.transform.parent = j3.transform;
-        elbowVis.transform.localScale = Vector3.one * 0.4f;
-        
         // Forearm Link (Extends Up Y)
         GameObject forearmVis = GameObject.CreatePrimitive(PrimitiveType.Cube);
         forearmVis.transform.parent = j3.transform;
