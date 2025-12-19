@@ -35,6 +35,9 @@ Files:
 ### 5) Tool landscape notes (Unity, Gazebo, Webots, MuJoCo, ROS 2)
 - `docs/TOOLS.md` provides a practical tool matrix and recommendations.
 
+### 6) Realistic 3D assets guide
+- `docs/REALISTIC_ASSETS.md` shows how to upgrade from basic Unity primitives to professional 3D models using free assets.
+
 ---
 
 ## Quick start
@@ -133,6 +136,12 @@ python -m twin.run_twin_stream --model arm3d --port 5555 --hz 50
 1. Run **DigitalTwin > Setup Robot Arm Scene**.
 2. Press **Play**.
 3. Run the python script above.
+
+**Want Realistic Visuals?**
+The demo uses basic Unity primitives (cylinders, cubes). To upgrade to professional-looking 3D models with realistic materials:
+- See **[Realistic Assets Guide](docs/REALISTIC_ASSETS.md)** for step-by-step instructions
+- Use free assets from Unity Asset Store, Sketchfab, or TurboSquid
+- Takes 30-60 minutes, makes your demo publication-ready
 
 ---
 
