@@ -20,6 +20,9 @@ import twin.models.mass_spring_damper as msd
 from twin.models.thermal_rc import ThermalRCParams
 import twin.models.thermal_rc as trc
 
+from twin.models.robot_arm import ArmParams
+import twin.models.robot_arm as arm
+
 
 def tcp_send_loop(host: str, port: int):
     srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -39,7 +42,7 @@ def main():
     ap.add_argument("--port", type=int, default=5555)
     ap.add_argument("--hz", type=float, default=50.0)
     ap.add_argument("--seconds", type=float, default=0.0, help="0 means run forever")
-    ap.add_argument("--model", choices=["msd", "thermal"], default="msd")
+    ap.add_argument("--model", choices=["msd", "thermal", "arm"], default="msd")
     ap.add_argument("--filter", choices=["ekf", "ukf", "none"], default="ekf")
     ap.add_argument("--log", default="", help="JSONL log path, e.g. out/run.jsonl")
     ap.add_argument("--noise_y", type=float, default=0.02, help="measurement noise std")
@@ -88,9 +91,66 @@ def main():
                 "x3": float(d["acc"]),
                 "y1": float(y[0]),
                 "y2": 0.0,
+                "joints": [],
                 "meta": meta
             }
 
+    elif args.model == "arm":
+        p = ArmParams()
+        # Initial state: Hanging down? Or horizontal?
+        x_true = np.array([0.0, 0.0, 0.0, 0.0], dtype=float) 
+        
+        def controller(t, x):
+            # Target: Draw a circle? Or just wave.
+            # q1_des = sin(t), q2_des = cos(t)
+            q1_des = 0.5 * math.sin(t) + math.pi/2 # Uprightish
+            q2_des = 1.0 * math.sin(2*t)
+            
+            q_des = np.array([q1_des, q2_des])
+            dq_des = np.array([0.5*math.cos(t), 2.0*math.cos(2*t)]) # Approx feedforward
+            
+            q = x[:2]
+            dq = x[2:]
+            
+            # PD Control
+            tau = p.kp * (q_des - q) + p.kd * (dq_des - dq)
+            return tau
+
+        def f(x, u, t, dt):
+            # u is computed externally usually, but here we can wrap it if needed.
+            # However, for EKF, 'u' is input.
+            # For simulation, we compute u based on True State.
+            # For Filter, we usually assume we KNOW u (applied torque).
+            return arm.step(x, u, t, dt, p)
+
+        def h(x, t):
+            return arm.measure(x, t, p)
+
+        n = 4
+        m = 2
+        Q = np.diag([1e-5, 1e-5, 1e-4, 1e-4]) # Process noise
+        R = np.diag([args.noise_y**2, args.noise_y**2])
+
+        x0 = np.array([0.1, 0.1, 0.0, 0.0], dtype=float) # Slight offset
+        P0 = np.eye(4) * 0.1
+
+        meta = "arm"
+
+        def pack(xhat: np.ndarray, y: np.ndarray, t: float) -> Dict[str, Any]:
+            # Recalculate u for derived info? Or just pass what we have.
+            # We'll calculate derived stats from xhat
+            d = arm.derived(xhat, None, t, p)
+            return {
+                "t": float(t),
+                "x1": float(d["ee_x"]), # End effector X
+                "x2": float(d["ee_y"]), # End effector Y
+                "x3": 0.0,
+                "y1": float(y[0]), # Measured q1
+                "y2": float(y[1]), # Measured q2
+                "joints": [float(d["q1"]), float(d["q2"])],
+                "meta": meta
+            }
+            
     else:  # thermal
         p = ThermalRCParams()
         x_true = np.array([20.0], dtype=float)
@@ -133,8 +193,10 @@ def main():
                 "x3": float(d["P_heat"]),
                 "y1": float(y[0]),
                 "y2": 0.0,
+                "joints": [],
                 "meta": meta
             }
+
 
     # Filter selection
     filt = None
@@ -160,14 +222,31 @@ def main():
             if args.seconds > 0 and t >= args.seconds:
                 break
 
-            # Compute control (if thermal)
+            # Compute control
             if args.model == "thermal":
                 if filt is None:
                     u = np.array([0.0], dtype=float)
                 else:
-                    # same simple policy uses estimated temperature
                     setpoint = 21.0
                     u = np.array([1.5 if float(filt.x[0]) < setpoint else 0.0], dtype=float)
+            elif args.model == "arm":
+                # Simple tracking controller using TRUE state for simulation physics
+                # In a real twin, this would be the actual control signal sent to the robot
+                # For the "Twin" prediction step (filt.predict), we pass this known 'u'.
+                
+                # Re-define controller logic here or use function
+                q1_des = 0.5 * math.sin(t) + math.pi/2
+                q2_des = 1.0 * math.sin(2*t)
+                q_des = np.array([q1_des, q2_des])
+                dq_des = np.array([0.5*math.cos(t), 2.0*math.cos(2*t)])
+                
+                q = x_true[:2]
+                dq = x_true[2:]
+                
+                # Gains hardcoded in param p, but we need 'p' here.
+                # 'p' is available from the scope above.
+                tau = p.kp * (q_des - q) + p.kd * (dq_des - dq)
+                u = tau
 
             # Propagate true system
             x_true = f(x_true, u, t, dt)

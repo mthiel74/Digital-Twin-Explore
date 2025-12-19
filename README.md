@@ -22,6 +22,7 @@ Files:
 ### 2) Twin models (examples)
 - `python/twin/models/mass_spring_damper.py`  
 - `python/twin/models/thermal_rc.py`  (room/house thermal 1R1C)
+- `python/twin/models/robot_arm.py` (2-link planar arm)
 
 ### 3) Filters / state estimation
 - `python/twin/filters/ekf.py`  (Extended Kalman Filter with numerical Jacobians)
@@ -77,6 +78,27 @@ To generate a 3D animation (GIF) from a recorded log:
 ```bash
 python -m eval.animate_msd --log out/run.jsonl --out out/animation.gif
 ```
+
+---
+
+## Robotic Arm Model (New!)
+Simulate a 2-link planar robot arm.
+
+**Run Simulation:**
+```bash
+python -m twin.run_twin_stream --model arm --headless --seconds 10 --log out/arm_run.jsonl
+```
+
+**Visualize (Python):**
+```bash
+python -m eval.animate_arm --log out/arm_run.jsonl --out out/arm_animation.gif
+```
+
+**Visualize (Unity):**
+1. Create a Cylinder (Joint1) and a child Cylinder (Joint2).
+2. Attach `RobotArmTelemetryClient.cs` to a manager object.
+3. Drag the cylinders into `Joint1` and `Joint2` fields.
+4. Set `Axis1` and `Axis2` to `(0, 0, 1)` (Z-axis).
 
 ---
 
@@ -183,7 +205,7 @@ digital-twin-starter-kit/
 
 Here is the Digital Twin in action (Headless Python Mode):
 
-### 3D Animation
+### 3D Animation (Mass-Spring-Damper)
 The blue box represents the **True System** (simulating physics + unknown disturbances).
 The red dashed box is the **Digital Twin** (using EKF to estimate state from noisy sensor data).
 
@@ -193,6 +215,11 @@ The red dashed box is the **Digital Twin** (using EKF to estimate state from noi
 The plot below shows the position tracking. The Twin (red dashed) closely follows the measurements (blue line) and the underlying true state, filtering out noise.
 
 ![Traces](docs/images/example_traces.png)
+
+### Robotic Arm (2-Link)
+The new `arm` model simulates a 2-link planar robot performing a dance.
+
+![Arm Animation](docs/images/example_arm.gif)
 
 ---
 
