@@ -1,7 +1,7 @@
 import numpy as np
 from dataclasses import dataclass
 from typing import Callable, Optional, Tuple
-from .utils.numerics import numerical_jacobian
+from ..utils.numerics import numerical_jacobian
 
 @dataclass
 class EKF:
