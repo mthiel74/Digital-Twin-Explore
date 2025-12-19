@@ -259,11 +259,17 @@ The video below demonstrates the **Digital Twin** system in action, showing a 2-
 
 This showcases the core digital twin workflow: a computational model (Python) synchronized to a visualization layer (Unity) via real-time data streaming, enabling state estimation, prediction, and decision-making.
 
+**Unity Simulation (Original)**
+
 ![Robot Arm Digital Twin Demo](docs/images/robot_arm_demo.gif)
 
-> **Tip**: The animation loops continuously. The original high-quality video is also available: [robot_arm_demo.mov](docs/images/robot_arm_demo.mov)
+**AI-Enhanced Version (GEN-3 Alpha Turbo)**
 
-**AI-Enhanced Version**: The Unity simulation was also processed through **Runway GEN-3 Alpha Turbo** (video-to-video) to explore how generative AI interprets physics simulations. See the comparison in the experimental videos section below.
+![AI-Enhanced Robot Arm](docs/images/RoboticHand.gif)
+
+> **Comparison**: The top video shows the raw Unity simulation with physics-based dynamics. The bottom video was processed through **Runway's GEN-3 Alpha Turbo** (video-to-video AI model), which adds cinematic quality and realistic textures while preserving the motion dynamics.
+>
+> **Original high-quality videos**: [Unity (MOV)](docs/images/robot_arm_demo.mov) | [AI-Enhanced (MP4)](docs/images/RoboticHand.mp4)
 
 ---
 
@@ -289,15 +295,15 @@ The new `arm` model simulates a 2-link planar robot performing a dance.
 
 ## Experimental: AI Video Enhancement
 
-The robot arm demo was processed through **Runway's GEN-3 Alpha Turbo** (video-to-video model) to explore how generative AI interprets physics-based simulations.
+The robot arm demo was processed through **Runway's GEN-3 Alpha Turbo** (video-to-video model) to explore how generative AI interprets physics-based simulations. See the side-by-side comparison in the **Robot Arm Digital Twin Demo** section above.
 
 **Key Observations**:
-- The AI model adds cinematic quality and texture detail
-- Physics behavior is preserved through temporal consistency
-- Visual artifacts appear where geometry is ambiguous (e.g., gripper-handle interaction)
-- **Limitation**: Neither the Unity original nor the AI version shows perfect handle grasping—the physics simulation is correct, but visual alignment needs refinement
+- ✨ **Visual Enhancement**: The AI model adds cinematic quality, realistic metal textures, and atmospheric lighting
+- 🎯 **Physics Preservation**: Motion dynamics and temporal consistency are maintained—the Kalman filter's state estimation remains intact
+- ⚠️ **Geometric Limitations**: Visual artifacts appear where geometry is ambiguous (e.g., gripper-handle interaction)
+- 🔍 **Honest Assessment**: Neither the Unity original nor the AI version shows perfect handle grasping—the physics simulation tracks state correctly, but visual alignment needs refinement
 
-This experiment demonstrates that **generative AI enhances aesthetics** while **physics-based models ensure trustworthy predictions**—they're complementary, not competing approaches.
+**Insight**: This experiment demonstrates that **generative AI enhances aesthetics** while **physics-based models ensure trustworthy predictions**—they're complementary tools, not competing approaches. For industrial digital twins, physics accuracy is paramount; AI post-processing can make demos more visually compelling for stakeholder presentations.
 
 ---
 
