@@ -200,63 +200,66 @@ def main():
             # Logic
             target = np.copy(pick_loc)
             offset = np.array([0, 0.3, 0])
+            dist = 0.0
             
             if sm_state == "MOVE_PICK_HOVER":
                 target = pick_loc + offset
                 gripper_cmd = 0.0
                 dist = np.linalg.norm(ee - target)
-                if dist < 0.1: sm_state = "DESCEND_PICK"
+                if dist < 0.2: sm_state = "DESCEND_PICK"
                 
             elif sm_state == "DESCEND_PICK":
                 target = pick_loc
                 gripper_cmd = 0.0
                 dist = np.linalg.norm(ee - target)
-                if dist < 0.05: 
+                if dist < 0.15: 
                     sm_state = "GRIP"
                     sm_timer = t
             
             elif sm_state == "GRIP":
                 target = pick_loc
                 gripper_cmd = 1.0
+                dist = np.linalg.norm(ee - target)
                 if t - sm_timer > 1.0: sm_state = "LIFT_PICK"
                 
             elif sm_state == "LIFT_PICK":
                 target = pick_loc + offset
                 gripper_cmd = 1.0
                 dist = np.linalg.norm(ee - target)
-                if dist < 0.1: sm_state = "MOVE_DROP_HOVER"
+                if dist < 0.2: sm_state = "MOVE_DROP_HOVER"
                 
             elif sm_state == "MOVE_DROP_HOVER":
                 target = drop_loc + offset
                 gripper_cmd = 1.0
                 dist = np.linalg.norm(ee - target)
-                if dist < 0.1: sm_state = "DESCEND_DROP"
+                if dist < 0.2: sm_state = "DESCEND_DROP"
                 
             elif sm_state == "DESCEND_DROP":
                 target = drop_loc
                 gripper_cmd = 1.0
                 dist = np.linalg.norm(ee - target)
-                if dist < 0.05: 
+                if dist < 0.15: 
                     sm_state = "RELEASE"
                     sm_timer = t
                     
             elif sm_state == "RELEASE":
                 target = drop_loc
                 gripper_cmd = 0.0
+                dist = np.linalg.norm(ee - target)
                 if t - sm_timer > 1.0: 
                     sm_state = "LIFT_DROP"
-                    # Teleport box back for loop? Or leave it.
-                    # Let's teleport it back to pick loc after a while so loop repeats forever
             
             elif sm_state == "LIFT_DROP":
                 target = drop_loc + offset
                 gripper_cmd = 0.0
-                if np.linalg.norm(ee - target) < 0.1:
+                dist = np.linalg.norm(ee - target)
+                if dist < 0.2:
                     sm_state = "RESET"
                     sm_timer = t
             
             elif sm_state == "RESET":
                 target = drop_loc + offset
+                dist = np.linalg.norm(ee - target)
                 if t - sm_timer > 2.0:
                     # Reset box
                     box_pos[:] = pick_loc[:]
@@ -265,11 +268,16 @@ def main():
             # Physics: If gripped and close, move box
             if gripper_cmd > 0.5:
                 # Naive attach
-                # If we are in GRIP/LIFT/MOVE/DESCEND states
                 dist_to_box = np.linalg.norm(ee - box_pos)
-                if dist_to_box < 0.2:
+                if dist_to_box < 0.25: # Forgiving attach distance
                     box_pos[:] = ee[:] # Box follows EE
             
+            # Debug Print
+            nonlocal k # We can access k from outer scope if we passed it? No.
+            # Just print every 1.0s based on t
+            if (int(t * 100) % 100) == 0:
+                 print(f"[Ctrl] {sm_state} | Dist: {dist:.3f} | BoxDist: {np.linalg.norm(ee - box_pos):.3f}")
+
             # IK
             q_des = arm3d.inverse_kinematics(target, p)
             return q_des

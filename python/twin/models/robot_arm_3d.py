@@ -7,8 +7,8 @@ from typing import Optional, Dict, Tuple
 class Arm3DParams:
     l1: float = 1.0  # Length of upper arm
     l2: float = 1.0  # Length of forearm
-    # Base height offset could be handled in IK or simple offset
-    base_h: float = 0.5 
+    # Base height offset (Unity: 0.2 (Base) + 0.4 (Turret offset) = 0.6)
+    base_h: float = 0.6 
 
 def inverse_kinematics(target: np.ndarray, p: Arm3DParams) -> np.ndarray:
     """

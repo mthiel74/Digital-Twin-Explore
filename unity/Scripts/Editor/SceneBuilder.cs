@@ -44,7 +44,7 @@ public class SceneBuilder : MonoBehaviour
         GameObject armVis = GameObject.CreatePrimitive(PrimitiveType.Cube);
         armVis.transform.parent = j2.transform;
         armVis.transform.localPosition = new Vector3(0, 0.5f, 0);
-        armVis.transform.localScale = new Vector3(0.2f, 1.0f, 0.2f); // Length 1
+        armVis.transform.localScale = new Vector3(0.3f, 1.0f, 0.3f); // Length 1, Thicker
         
         // 5. Joint 3 (Elbow - Rotates X)
         GameObject j3 = new GameObject("Joint3_Elbow");
@@ -59,7 +59,7 @@ public class SceneBuilder : MonoBehaviour
         GameObject forearmVis = GameObject.CreatePrimitive(PrimitiveType.Cube);
         forearmVis.transform.parent = j3.transform;
         forearmVis.transform.localPosition = new Vector3(0, 0.5f, 0);
-        forearmVis.transform.localScale = new Vector3(0.15f, 1.0f, 0.15f); // Length 1
+        forearmVis.transform.localScale = new Vector3(0.25f, 1.0f, 0.25f); // Length 1, Thicker
         
         // 6. Wrist/Hand
         GameObject handPivot = new GameObject("Wrist");
