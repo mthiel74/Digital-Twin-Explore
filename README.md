@@ -94,10 +94,26 @@ python -m twin.run_twin_stream --model arm --headless --seconds 10 --log out/arm
 python -m eval.animate_arm --log out/arm_run.jsonl --out out/arm_animation.gif
 ```
 
-**Visualize (Unity):**
+**Visualize (Unity) - Automated Setup:**
 1. Open the project in Unity.
 2. In the top menu, click **DigitalTwin > Setup Robot Arm Scene**.
 3. Press **Play**.
+
+**Visualize (Unity) - Manual Setup (If menu is missing):**
+1. Create an empty GameObject named `RobotArm`.
+2. Create an empty child named `ShoulderPivot` at `(0,0,0)`.
+3. Create a Cylinder child of `ShoulderPivot`, move it to `(0,1,0)` (so it sits on top).
+4. Create an empty child of `ShoulderPivot` named `ElbowPivot` at `(0,2,0)` (top of the first arm).
+5. Create a Cylinder child of `ElbowPivot`, move it to `(0,1,0)`.
+6. Add `RobotArmTelemetryClient.cs` to `RobotArm`.
+7. Drag `ShoulderPivot` to **Joint 1** and `ElbowPivot` to **Joint 2**.
+
+**Run Simulation (Python):**
+> **Note:** Always run these commands from the `python/` directory!
+```bash
+cd python
+python -m twin.run_twin_stream --model arm --port 5555 --hz 50
+```
 
 ---
 
