@@ -62,16 +62,22 @@ The `pipeline_twin` package adds a modular, laptop-scale transient 1D pipeline
 digital twin with pump/valve boundaries, leak injection, synthetic sensors, and
 EnKF-based state/parameter estimation. Specs live in `SPEC.md`.
 
-Run a simulation and save plots:
+Run a simulation and save plots (no `PYTHONPATH` tweaks needed):
 
 ```bash
-python -m pipeline_twin.run --config configs/default.yaml --outdir outputs
+python run_pipeline_twin.py --config configs/default.yaml --outdir outputs
 ```
 
-Disable plots:
+Prefer module execution? Add `src/` to the import path:
 
 ```bash
-PYTHONPATH=src python -m pipeline_twin.run --config configs/default.yaml --no-plots
+PYTHONPATH=src python -m pipeline_twin.run --config configs/default.yaml --outdir outputs
+```
+
+Disable plots with either entrypoint:
+
+```bash
+python run_pipeline_twin.py --config configs/default.yaml --no-plots
 ```
 
 Configuration examples:

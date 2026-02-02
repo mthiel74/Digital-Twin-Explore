@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import argparse
 
+from typing import Sequence
+
 from .config import load_config
 from .enkf import initialize_ensemble, propagate, update
 from .multihypothesis import evaluate_leak_hypotheses
@@ -17,13 +19,13 @@ from .plots import (
 from .simulate import run_simulation
 
 
-def main() -> None:
+def main(argv: Sequence[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description="Run pipeline digital twin simulation")
     parser.add_argument("--config", type=str, default="configs/default.yaml", help="Path to YAML/JSON config")
     parser.add_argument("--outdir", type=str, default="outputs", help="Directory for plots")
     parser.add_argument("--image-format", type=str, default="png", choices=["png", "svg"], help="Image format for saved plots")
     parser.add_argument("--no-plots", action="store_true", help="Disable plot generation")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     cfg = load_config(args.config)
     result = run_simulation(cfg)
